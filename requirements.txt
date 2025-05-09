@@ -1,0 +1,4 @@
+dotenv
+langchain
+langchain_ibm
+ibm_cloud_sdk_core

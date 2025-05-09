@@ -1,0 +1,71 @@
+PROJECTID="39468945-6088-4d55-86a7-75a07c75f61e"
+GENAIKEY="9uBOD0fWZvED30o9U2y1xXzRUy30zpHtx7rSvICVs9O5"
+
+
+import requests
+
+url = "https://eu-de.ml.cloud.ibm.com/ml/v1/text/generation?version=2023-05-29"
+
+body = {
+	"input": """<|assistant|>
+""",
+	"parameters": {
+		"decoding_method": "greedy",
+		"max_new_tokens": 900,
+		"min_new_tokens": 0,
+		"repetition_penalty": 1.05
+	},
+	"model_id": "ibm/granite-13b-instruct-v2",
+	"project_id": "39468945-6088-4d55-86a7-75a07c75f61e",
+	"moderations": {
+		"hap": {
+			"input": {
+				"enabled": True,
+				"threshold": 0.5,
+				"mask": {
+					"remove_entity_value": True
+				}
+			},
+			"output": {
+				"enabled": True,
+				"threshold": 0.5,
+				"mask": {
+					"remove_entity_value": True
+				}
+			}
+		},
+		"pii": {
+			"input": {
+				"enabled": True,
+				"threshold": 0.5,
+				"mask": {
+					"remove_entity_value": True
+				}
+			},
+			"output": {
+				"enabled": True,
+				"threshold": 0.5,
+				"mask": {
+					"remove_entity_value": True
+				}
+			}
+		}
+	}
+}
+
+headers = {
+	"Accept": "application/json",
+	"Content-Type": "application/json",
+	"Authorization": "Bearer YOUR_ACCESS_TOKEN"
+}
+
+response = requests.post(
+	url,
+	headers=headers,
+	json=body
+)
+
+if response.status_code != 200:
+	raise Exception("Non-200 response: " + str(response.text))
+
+data = response.json()
