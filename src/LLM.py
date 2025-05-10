@@ -1,4 +1,5 @@
 import os
+import warnings
 from dotenv import load_dotenv
 from Functions import Functions
 from langchain.agents import Tool
@@ -6,8 +7,8 @@ from langchain_ibm import WatsonxLLM
 from langchain.agents import AgentExecutor
 from langchain.prompts import PromptTemplate
 from ibm_cloud_sdk_core import IAMTokenManager
-from langchain.memory import ConversationBufferMemory
 from langchain_core.runnables import RunnablePassthrough
+from langchain.memory import ConversationBufferWindowMemory
 from langchain.agents.format_scratchpad import format_log_to_str
 from langchain.agents.output_parsers import JSONAgentOutputParser
 from langchain.tools.render import render_text_description_and_args
@@ -44,37 +45,6 @@ AGENT = """ Respond to the human as helpfully and accurately as possible. You ha
 				}}
 				```
 				The tool response is always a simple string representing the final response."""
-
-
-AGENT1 = """ Respond to the human as helpfully and accurately as possible. You have access to the following tools: {tools}
-				Use a json blob to specify a tool by providing an action key (tool name) and an action_input key (tool input).
-				Valid "action" values: "Final Answer" or {tool_names}
-				Provide only ONE action per $JSON_BLOB, as shown:"
-				```
-				{{
-					"action": $TOOL_NAME,
-					"action_input": $INPUT
-				}}
-				```
-				Follow this format:
-				Question: input question to answer
-				Thought: consider previous and subsequent steps
-				Action:
-				```
-				$JSON_BLOB
-				```
-				Observation: action result
-				... (repeat Thought/Action/Observation N times)
-				Thought: I know what to respond
-				Action:
-				```
-				{{
-				"action": "Final Answer",
-				"action_input": "Final response to human"
-				}}
-				Begin! Reminder to ALWAYS respond with a valid json blob of a single action.
-				Respond directly if appropriate. Format is Action:```$JSON_BLOB```then Observation"""
-
 
 
 class LLM:
@@ -124,7 +94,8 @@ class LLM:
 		tool_names=", ".join([t.name for t in self.tools]),
 		)
 
-		memory = ConversationBufferMemory()
+		warnings.filterwarnings("ignore")
+		memory = ConversationBufferWindowMemory(k=5)
 
 		agent_chain = ( RunnablePassthrough.assign(
 			agent_scratchpad=lambda x: format_log_to_str(x["intermediate_steps"]),
@@ -132,7 +103,7 @@ class LLM:
 			) | tools_prompt | self.llm | JSONAgentOutputParser()
 		)
 
-		executor = AgentExecutor(agent=agent_chain, tools=self.tools, handle_parsing_errors=True, verbose=True, memory=memory)
+		executor = AgentExecutor(agent=agent_chain, tools=self.tools, handle_parsing_errors=True, verbose=False, memory=memory)
 
 		response = executor.invoke({"input":question})
 		print(f"Response: {response}")
