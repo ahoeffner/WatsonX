@@ -10,14 +10,19 @@ class Functions :
 		"""
 		Flight departure tool to list flights based on origin, destination, and date.
 		Args:
-			origin (str): The origin city or airport code.
-			destination (str): The destination city or airport code.
+			origin (str): The origin airport code.
+			destination (str): The destination airport code.
 			date (str): The date of travel in YYYY-MM-DD format.
 		Returns:
 			str: A message indicating the flight details.
 		"""
 
+		print()
 		print("****************** listFlights called ******************")
+		print(f"Origin: {origin}")
+		print(f"Destination: {destination}")
+		print(f"Date: {date}")
+		print()
 
 		response = {
 			"Observation": "action result",

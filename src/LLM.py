@@ -7,6 +7,7 @@ from langchain_ibm import WatsonxLLM
 from langchain.agents import AgentExecutor
 from langchain.prompts import PromptTemplate
 from ibm_cloud_sdk_core import IAMTokenManager
+from langchain_core.messages import HumanMessage
 from langchain_core.runnables import RunnablePassthrough
 from langchain.memory import ConversationBufferWindowMemory
 from langchain.agents.format_scratchpad import format_log_to_str
@@ -28,8 +29,8 @@ tknmgr = IAMTokenManager(apikey=APIKEY)
 TOKEN = tknmgr.get_token()
 
 # Define the prompt templates
-PROMPT = """{input} {agent_scratchpad} (reminder to always respond in a JSON blob)"""
 
+PROMPT = """{input} {agent_scratchpad} (reminder to always respond in a JSON blob)"""
 SYSTEM = """ You are a personal assistant. Do your best to answer as concisely as possible. " \
 				 For travel-related questions, you should use the tools available for providing up tp date information.
 				 Based on the given instructions, answer the following question {question}."""
@@ -49,7 +50,7 @@ AGENT = """ Respond to the human as helpfully and accurately as possible. You ha
 
 class LLM:
 	def __init__(self,tools:list[Tool] = None):
-		self.history = []
+		self.history = ""
 		self.tools = tools
 
 		parameters = {
@@ -84,6 +85,7 @@ class LLM:
 		prompt = ChatPromptTemplate.from_messages(
 		[
 			("system", AGENT),
+			("human", self.history),
 			MessagesPlaceholder("chat_history", optional=True),
 			("human", PROMPT),
 		]
@@ -107,13 +109,18 @@ class LLM:
 
 		response = executor.invoke({"input":question})
 		print(f"Response: {response}")
+
+		self.history += "question: " + question + "\n"
+		self.history += "answer: "+response["output"] + "\n"
+		self.history += "\n\n"
+
 		return response
 
 
 def main():
 	llm = LLM(Functions.tools())
 	llm.chat("find me a flight from London to Paris on 2023-10-01")
-	llm.chat("And from Paris to London")
+	llm.chat("And how about flights from Paris to London, same date")
 
 if __name__ == "__main__":
     main()
