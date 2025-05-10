@@ -77,10 +77,10 @@ class LLM:
 			response = chain.invoke({"question": question})
 			return response
 		else:
-			return self.agent(question)
+			return self.chatWithTools(question)
 
 
-	def agent(self, question:str):
+	def chatWithTools(self, question:str):
 		prompt = ChatPromptTemplate.from_messages(
 		[
 			("system", AGENT),
@@ -113,6 +113,7 @@ class LLM:
 def main():
 	llm = LLM(Functions.tools())
 	llm.chat("find me a flight from London to Paris on 2023-10-01")
+	llm.chat("And from Paris to London")
 
 if __name__ == "__main__":
     main()
