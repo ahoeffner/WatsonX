@@ -1,6 +1,9 @@
-import argparse
+import os
 import json
+import argparse
 import requests
+from dotenv import load_dotenv
+
 
 from ibm_cloud_sdk_core import IAMTokenManager
 from langchain.prompts import PromptTemplate
@@ -17,12 +20,14 @@ from langchain_ibm import WatsonxLLM
 from typing import List
 
 
-URL="https://eu-de.ml.cloud.ibm.com"
-GENAIKEY = "9uBOD0fWZvED30o9U2y1xXzRUy30zpHtx7rSvICVs9O5"
-PROJECTID = "39468945-6088-4d55-86a7-75a07c75f61e"
-MODELID="ibm/granite-13b-instruct-v2"
+load_dotenv()
 
-iam_token_manager = IAMTokenManager(apikey=GENAIKEY)
+URL = os.getenv("URL")
+MODEL = os.getenv("MODEL")
+APIKEY = os.getenv("APIKEY")
+PROJECTID = os.getenv("PROJECTID")
+
+iam_token_manager = IAMTokenManager(apikey=APIKEY)
 TOKEN = iam_token_manager.get_token()
 
 
@@ -77,7 +82,7 @@ def weather_service(cities: List[str]) -> str:
 def load_env():
 
 	validation = True
-	ibmcloud_apikey = GENAIKEY
+	ibmcloud_apikey = APIKEY
 
 	if( validation == False):
 		return{  "apikey" : "ERROR",
@@ -101,7 +106,7 @@ def load_env():
 		else:
 				project_id = PROJECTID
 				url = URL
-				model_id = MODELID
+				model_id = MODEL
 
 		return { "project_id" : project_id,
 					"url": url,
