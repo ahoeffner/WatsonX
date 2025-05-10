@@ -1,4 +1,5 @@
 
+import json
 from typing import Optional
 from langchain.agents import Tool
 from langchain_core.tools import tool
@@ -16,10 +17,20 @@ class Functions :
 			str: A message indicating the flight details.
 		"""
 
-		print("listFlights called with parameters:")
+		print("****************** listFlights called ******************")
 
-		return "Final answer: The flight departure tool was invoked with the following parameters: " \
-			+ f"Origin: {origin}, Destination: {destination}, Date: {date}"
+		response = {
+			"Observation": "action result",
+			"Thought": "I know what to respond",
+			"Action": {
+				"action": "Final Answer",
+				"action_input": "We have found the following flights: SK0263, SK0264, SK0265"
+			}
+		}
+
+		response = json.dumps(response, indent=4)
+		return response
+
 
 
 	def tools() -> list[Tool]:
